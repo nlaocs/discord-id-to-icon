@@ -1,5 +1,3 @@
-extern crate base64;
-
 use std::io;
 use std::io::Write;
 use ureq;
@@ -26,7 +24,7 @@ struct UserInfo {
 }
 
 fn get_id() -> String {
-    print!("ID: ");
+    print!("IDを入力: ");
     io::stdout().flush().unwrap();
     let mut input = String::new();
     io::stdin().read_line(&mut input).unwrap();
