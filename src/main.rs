@@ -5,6 +5,7 @@ use dotenv::dotenv;
 use serde::Deserialize;
 use serde_json::Value;
 use base64::{engine::general_purpose, Engine};
+use chrono::{DateTime, Utc, NaiveDateTime};
 
 #[derive(Deserialize)]
 struct UserInfo {
@@ -22,6 +23,10 @@ struct UserInfo {
     avatar_decoration_data: Option<Value>,
     banner_color: Option<String>,
 }
+
+/*fn convert_timestamp(id: &str) -> String {
+
+}*/
 
 fn get_id() -> String {
     print!("IDを入力: ");
@@ -104,6 +109,7 @@ fn get_info(){
         println!("Avatar Decoration Data: {:?}", info.avatar_decoration_data);
         println!("Banner Color: {}", info.banner_color.unwrap_or("null".to_string()));
         println!("Token: {}.****.*********", get_token(&info.id));
+        //println!("Create Account: {}", convert_timestamp(&info.id));
     } else {
         eprintln!("Error: {:?}", resp.unwrap_err());
     }
