@@ -28,8 +28,8 @@ fn convert_timestamp(id_str: &str) -> NaiveDateTime {
     let id: i64 = id_str.parse().unwrap();
     let epoch: i64 = 1420070400000;
     let timestamp = ((id >> 22) + epoch) / 1000;
-    let datetime = Utc.timestamp(timestamp, 0);
-    datetime.naive_utc()
+    let datetime = Utc.timestamp_opt(timestamp, 0).unwrap().naive_utc();
+    datetime
 }
 
 fn get_id() -> String {
