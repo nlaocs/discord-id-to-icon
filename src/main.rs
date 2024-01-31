@@ -108,7 +108,7 @@ fn get_info(){
         };
         let accent_color = info.accent_color.map_or("null".to_string(), |color| color.to_string());
         let global_name = info.global_name.unwrap_or("null".to_string());
-        let avatar_decoration_data = info.avatar_decoration_data.expect("null");
+        let avatar_decoration_data = info.avatar_decoration_data.unwrap_or_else(|| serde_json::json!(null));
         let banner_color = info.banner_color.unwrap_or("null".to_string());
         let token = format!("{}.****.*********", get_token(&info.id));
         let created_account_utc = convert_timestamp(&info.id);
@@ -124,7 +124,7 @@ fn get_info(){
         println!("Banner Link: {}", banner_link);
         println!("Accent Color: {}", accent_color);
         println!("Global Name: {}", global_name);
-        println!("Avatar Decoration Data: {:?}", avatar_decoration_data);
+        println!("Avatar Decoration Data: {}", avatar_decoration_data);
         println!("Banner Color: {}", banner_color);
         println!("Token: {}.****.*********", token);
         println!("Created Account(UTC): {}", created_account_utc);
