@@ -185,7 +185,7 @@ fn get_info(){
         println!("Global Name: {}", global_name);
         println!("Avatar Decoration Data: {}", avatar_decoration_data);
         println!("Banner Color: {}", banner_color);
-        println!("Token: {}.****.*********", token);
+        println!("Token: {}", token);
         println!("Created Account(UTC): {}", created_account_utc);
         println!("Created Account(JST): {}", created_account_jst);
     } else {
