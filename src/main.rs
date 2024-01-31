@@ -79,6 +79,15 @@ fn get_banner_link(id: &str, banner_id: &str) -> Result<String, bool> {
     }
 }
 
+fn nitro_type(nitrotype: u32) -> String {
+    match nitrotype {
+        0 => "なし".to_string(),
+        1 => "Nitro Classic".to_string(),
+        2 => "Nitro".to_string(),
+        _ => "不明".to_string(),
+    }
+}
+
 fn check_flags(user_flags: &u32) -> Vec<String> {
     let flags = [
         ("Discord_Employee", 1),
@@ -145,7 +154,7 @@ fn get_info(){
         };
         let discriminator = info.discriminator;
         let public_flags = info.public_flags;
-        let premium_type = info.premium_type;
+        let premium_type = nitro_type(info.premium_type);
         let flags = info.flags;
         let badges = check_flags(&flags);
         let bot = info.bot.unwrap_or(false);
@@ -165,7 +174,7 @@ fn get_info(){
         println!("AvatarLink: {}", avatar_link);
         println!("Discriminator: {}", discriminator);
         println!("Public Flags: {}", public_flags);
-        println!("Premium Type: {}", premium_type);
+        println!("Nitro Type: {}", premium_type);
         println!("Badge Flags: {}", flags);
         for badges in badges.iter() {
             println!("Badge: {}", badges);
