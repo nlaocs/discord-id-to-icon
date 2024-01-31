@@ -79,6 +79,36 @@ fn get_banner_link(id: &str, banner_id: &str) -> Result<String, bool> {
     }
 }
 
+fn check_flags(user_flags: &u32) -> Vec<String> {
+    let flags = [
+        ("Discord_Employee", 1),
+        ("Partnered_Server_Owner", 2),
+        ("HypeSquad_Events", 4),
+        ("Bug_Hunter_Level_1", 8),
+        ("HypeSquad_Bravery", 64),
+        ("HypeSquad_Brilliance", 128),
+        ("HypeSquad_Balance", 256),
+        ("PremiumEarlySupporter", 512),
+        ("TeamPseudoUser", 1024),
+        ("BugHunterLevel2", 16384),
+        ("VerifiedBot", 65536),
+        ("VerifiedDeveloper", 131072),
+        ("DiscriminatorZero", 1048576),
+        ("BotHTTPInteractions", 524288),
+        ("ActiveDeveloper", 4194304),
+    ];
+
+    let mut user_badges = Vec::new();
+
+    for &(flag_name, flag_value) in flags.iter() {
+        if user_flags & flag_value == flag_value {
+            user_badges.push(flag_name.to_string());
+        }
+    }
+
+    user_badges
+}
+
 fn get_info(){
     dotenv().ok();
     let token = match std::env::var("DISCORD_BOT_TOKEN") {
@@ -117,6 +147,7 @@ fn get_info(){
         let public_flags = info.public_flags;
         let premium_type = info.premium_type;
         let flags = info.flags;
+        let badges = check_flags(&flags);
         let bot = info.bot.unwrap_or(false);
         let banner_link = match get_banner_link(&info.id, &info.banner.unwrap_or_else(|| "".to_string())) {
             Ok(url) => url,
@@ -135,7 +166,10 @@ fn get_info(){
         println!("Discriminator: {}", discriminator);
         println!("Public Flags: {}", public_flags);
         println!("Premium Type: {}", premium_type);
-        println!("Flags: {}", flags);
+        println!("Badge Flags: {}", flags);
+        for badges in badges.iter() {
+            println!("Badge: {}", badges);
+        }
         println!("Bot: {}", bot);
         println!("Banner Link: {}", banner_link);
         println!("Accent Color: {}", accent_color);
