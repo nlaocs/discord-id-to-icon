@@ -81,10 +81,10 @@ fn get_banner_link(id: &str, banner_id: &str) -> Result<String, bool> {
 
 fn nitro_type(nitrotype: u32) -> String {
     match nitrotype {
-        0 => "なし".to_string(),
+        0 => "false".to_string(),
         1 => "Nitro Classic".to_string(),
         2 => "Nitro".to_string(),
-        _ => "不明".to_string(),
+        _ => "null".to_string(),
     }
 }
 
