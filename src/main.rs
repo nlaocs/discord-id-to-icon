@@ -5,7 +5,7 @@ use dotenv::dotenv;
 use serde::Deserialize;
 use serde_json::Value;
 use base64::{engine::general_purpose, Engine};
-use chrono::{DateTime, Utc, NaiveDateTime};
+use chrono::{Utc, NaiveDateTime, TimeZone};
 
 #[derive(Deserialize)]
 struct UserInfo {
@@ -24,9 +24,13 @@ struct UserInfo {
     banner_color: Option<String>,
 }
 
-/*fn convert_timestamp(id: &str) -> String {
-
-}*/
+fn convert_timestamp(id_str: &str) -> NaiveDateTime {
+    let id: i64 = id_str.parse().unwrap();
+    let epoch: i64 = 1420070400000;
+    let timestamp = ((id >> 22) + epoch) / 1000;
+    let datetime = Utc.timestamp(timestamp, 0);
+    datetime.naive_utc()
+}
 
 fn get_id() -> String {
     print!("IDを入力: ");
@@ -79,7 +83,6 @@ fn get_info(){
     dotenv().ok();
     let token = std::env::var("DISCORD_BOT_TOKEN").expect("Expected a token in the environment");
     let id = get_id();
-
     let url = format!("https://discordapp.com/api/users/{}", id);
     let resp = ureq::get(&url)
         .set("authorization", &format!("Bot {}", token))
@@ -87,30 +90,47 @@ fn get_info(){
         .call();
     if let Ok(response) = resp {
         let response_text = response.into_string().unwrap();
-        //print!("{}", response_text);
         let info: UserInfo = serde_json::from_str(&response_text).expect("エラーーー");
-        println!("ID: {}", info.id);
-        println!("Username: {}", info.username);
-        match get_icon_link(&info.id, &info.avatar.unwrap_or_else(|| "".to_string())) {
-            Ok(url) => println!("AvatarLink: {}", url),
-            Err(_) => println!("AvatarLink: null"),
-        }
-        println!("Discriminator: {}", info.discriminator);
-        println!("Public Flags: {}", info.public_flags);
-        println!("Premium Type: {}", info.premium_type);
-        println!("Flags: {}", info.flags);
-        println!("Bot: {}", info.bot.unwrap_or(false));
-        match get_banner_link(&info.id, &info.banner.unwrap_or_else(|| "".to_string())) {
-            Ok(url) => println!("BannerLink: {}", url),
-            Err(_) => println!("BannerLink: null"),
-        }
-        println!("Accent Color: {}", info.accent_color.map_or("null".to_string(), |color| color.to_string()));
-        println!("Global Name: {}", info.global_name.unwrap_or("null".to_string()));
-        println!("Avatar Decoration Data: {:?}", info.avatar_decoration_data);
-        println!("Banner Color: {}", info.banner_color.unwrap_or("null".to_string()));
-        println!("Token: {}.****.*********", get_token(&info.id));
-        //println!("Create Account: {}", convert_timestamp(&info.id));
+        let id = &info.id;
+        let username = info.username;
+        let avatar_link = match get_icon_link(&info.id, &info.avatar.unwrap_or_else(|| "".to_string())) {
+            Ok(url) => url,
+            Err(_) => "null".to_string(),
+        };
+        let discriminator = info.discriminator;
+        let public_flags = info.public_flags;
+        let premium_type = info.premium_type;
+        let flags = info.flags;
+        let bot = info.bot.unwrap_or(false);
+        let banner_link = match get_banner_link(&info.id, &info.banner.unwrap_or_else(|| "".to_string())) {
+            Ok(url) => url,
+            Err(_) => "null".to_string(),
+        };
+        let accent_color = info.accent_color.map_or("null".to_string(), |color| color.to_string());
+        let global_name = info.global_name.unwrap_or("null".to_string());
+        let avatar_decoration_data = info.avatar_decoration_data.expect("null");
+        let banner_color = info.banner_color.unwrap_or("null".to_string());
+        let token = format!("{}.****.*********", get_token(&info.id));
+        let created_account_utc = convert_timestamp(&info.id);
+        let created_account_jst = created_account_utc + chrono::Duration::hours(9);
+        println!("ID: {}", id);
+        println!("Username: {}", username);
+        println!("AvatarLink: {}", avatar_link);
+        println!("Discriminator: {}", discriminator);
+        println!("Public Flags: {}", public_flags);
+        println!("Premium Type: {}", premium_type);
+        println!("Flags: {}", flags);
+        println!("Bot: {}", bot);
+        println!("Banner Link: {}", banner_link);
+        println!("Accent Color: {}", accent_color);
+        println!("Global Name: {}", global_name);
+        println!("Avatar Decoration Data: {:?}", avatar_decoration_data);
+        println!("Banner Color: {}", banner_color);
+        println!("Token: {}.****.*********", token);
+        println!("Created Account(UTC): {}", created_account_utc);
+        println!("Created Account(JST): {}", created_account_jst);
     } else {
+        println!("IDが正しくありません");
         eprintln!("Error: {:?}", resp.unwrap_err());
     }
 }
