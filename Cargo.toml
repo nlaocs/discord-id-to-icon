@@ -1,6 +1,7 @@
 [package]
 name = "discord_id_to_icon"
-version = "0.1.0"
+version = "1.0.0"
+authors = ["nlaocs"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
