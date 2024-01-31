@@ -136,5 +136,8 @@ fn get_info(){
 }
 
 fn main() {
-    get_info();
+    loop {
+        get_info();
+        println!();
+    }
 }
