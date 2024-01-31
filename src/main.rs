@@ -81,7 +81,23 @@ fn get_banner_link(id: &str, banner_id: &str) -> Result<String, bool> {
 
 fn get_info(){
     dotenv().ok();
-    let token = std::env::var("DISCORD_BOT_TOKEN").expect("Expected a token in the environment");
+    let token = match std::env::var("DISCORD_BOT_TOKEN") {
+        Ok(val) => {
+            if val.trim().is_empty() {
+                println!("Botのトークンが設定されていません");
+                let mut input = String::new();
+                std::io::stdin().read_line(&mut input).unwrap();
+                std::process::exit(1);
+            }
+            val
+        },
+        Err(_e) => {
+            println!("Botのトークンが設定されていません");
+            let mut input = String::new();
+            std::io::stdin().read_line(&mut input).unwrap();
+            std::process::exit(1);
+        }
+    };
     let id = get_id();
     let url = format!("https://discordapp.com/api/users/{}", id);
     let resp = ureq::get(&url)
