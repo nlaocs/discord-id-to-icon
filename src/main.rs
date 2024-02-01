@@ -38,33 +38,16 @@ fn get_id() -> String {
     let mut input = String::new();
     io::stdin().read_line(&mut input).unwrap();
     println!();
-    return input.trim().to_string();
+    input.trim().to_string()
 }
 
 fn get_token(id: &str ) -> String {
-    return general_purpose::STANDARD.encode(id).replace("=", "")
+    general_purpose::STANDARD.encode(id).replace("=", "")
 }
 
-fn get_icon_link(id: &str ,avatar_id: &str) -> Result<String, bool> {
-    let gif_url = format!("https://cdn.discordapp.com/avatars/{}/{}.gif?size=4096", id, avatar_id);
-    let png_url = format!("https://cdn.discordapp.com/avatars/{}/{}.png?size=4096", id, avatar_id);
-
-    let gif_resp = ureq::get(&gif_url).call();
-    if gif_resp.is_ok() {
-        return Ok(gif_url);
-    } else {
-        let png_resp = ureq::get(&png_url).call();
-        if png_resp.is_ok() {
-            return Ok(png_url);
-        } else {
-            return Err(false);
-        }
-    }
-}
-
-fn get_banner_link(id: &str, banner_id: &str) -> Result<String, bool> {
-    let gif_url = format!("https://cdn.discordapp.com/banners/{}/{}.gif?size=4096", id, banner_id);
-    let png_url = format!("https://cdn.discordapp.com/banners/{}/{}.png?size=4096", id, banner_id);
+fn get_link(id: &str, image_id: &str, image_type: &str) -> Result<String, bool> {
+    let gif_url = format!("https://cdn.discordapp.com/{}/{}/{}.gif?size=4096", image_type, id, image_id);
+    let png_url = format!("https://cdn.discordapp.com/{}/{}/{}.png?size=4096", image_type, id, image_id);
 
     let gif_resp = ureq::get(&gif_url).call();
     if gif_resp.is_ok() {
@@ -148,7 +131,7 @@ fn get_info(token: &str) {
         let username = &info.username;
         let global_name = info.global_name.unwrap_or("null".to_string());
         let old_name = old_name(&info.username, &info.discriminator);
-        let avatar_link = match get_icon_link(&info.id, &info.avatar.unwrap_or_else(|| "".to_string())) {
+        let avatar_link = match get_link(&info.id, &info.avatar.unwrap_or_else(|| "".to_string()), "avatars") {
             Ok(url) => url,
             Err(_) => "null".to_string(),
         };
@@ -158,7 +141,7 @@ fn get_info(token: &str) {
         let flags = info.flags;
         let badges = check_flags(&flags);
         let bot = info.bot.unwrap_or(false);
-        let banner_link = match get_banner_link(&info.id, &info.banner.unwrap_or_else(|| "".to_string())) {
+        let banner_link = match get_link(&info.id, &info.banner.unwrap_or_else(|| "".to_string()), "banners") {
             Ok(url) => url,
             Err(_) => "null".to_string(),
         };
