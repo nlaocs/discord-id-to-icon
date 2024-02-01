@@ -1,6 +1,6 @@
 [package]
 name = "discord_id_to_icon"
-version = "1.2.2"
+version = "2.0.0"
 authors = ["nlaocs"]
 edition = "2021"
 
