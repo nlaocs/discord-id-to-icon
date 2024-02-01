@@ -118,6 +118,14 @@ fn check_flags(user_flags: &u32) -> Vec<String> {
     user_badges
 }
 
+fn old_name(username: &str, number: &str) -> String {
+    if number == "0" {
+        "null".to_string()
+    } else {
+        format!("{}#{}", username, number)
+    }
+}
+
 fn check_token(token: &str) -> bool {
     let url = "https://discordapp.com/api/v9/users/@me";
     let resp = ureq::get(url)
@@ -137,7 +145,9 @@ fn get_info(token: &str) {
         let response_text = response.into_string().unwrap();
         let info: UserInfo = serde_json::from_str(&response_text).expect("エラーーー");
         let id = &info.id;
-        let username = info.username;
+        let username = &info.username;
+        let global_name = info.global_name.unwrap_or("null".to_string());
+        let old_name = old_name(&info.username, &info.discriminator);
         let avatar_link = match get_icon_link(&info.id, &info.avatar.unwrap_or_else(|| "".to_string())) {
             Ok(url) => url,
             Err(_) => "null".to_string(),
@@ -153,7 +163,6 @@ fn get_info(token: &str) {
             Err(_) => "null".to_string(),
         };
         let accent_color = info.accent_color.map_or("null".to_string(), |color| color.to_string());
-        let global_name = info.global_name.unwrap_or("null".to_string());
         let avatar_decoration_data = info.avatar_decoration_data.unwrap_or_else(|| serde_json::json!(null));
         let banner_color = info.banner_color.unwrap_or("null".to_string());
         let token = format!("{}.****.*********", get_token(&info.id));
@@ -161,6 +170,8 @@ fn get_info(token: &str) {
         let created_account_jst = created_account_utc + chrono::Duration::hours(9);
         println!("ID: {}", id);
         println!("Username: {}", username);
+        println!("Global Name: {}", global_name);
+        println!("Old Name: {}", old_name);
         println!("AvatarLink: {}", avatar_link);
         println!("Discriminator: {}", discriminator);
         println!("Public Flags: {}", public_flags);
@@ -172,7 +183,6 @@ fn get_info(token: &str) {
         println!("Bot: {}", bot);
         println!("Banner Link: {}", banner_link);
         println!("Accent Color: {}", accent_color);
-        println!("Global Name: {}", global_name);
         println!("Avatar Decoration Data: {}", avatar_decoration_data);
         println!("Banner Color: {}", banner_color);
         println!("Token: {}", token);
