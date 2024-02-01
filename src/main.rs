@@ -118,25 +118,15 @@ fn check_flags(user_flags: &u32) -> Vec<String> {
     user_badges
 }
 
-fn get_info(){
-    dotenv().ok();
-    let token = match std::env::var("DISCORD_BOT_TOKEN") {
-        Ok(val) => {
-            if val.trim().is_empty() {
-                println!("Botのトークンが設定されていません");
-                let mut input = String::new();
-                std::io::stdin().read_line(&mut input).unwrap();
-                std::process::exit(1);
-            }
-            val
-        },
-        Err(_e) => {
-            println!("Botのトークンが設定されていません");
-            let mut input = String::new();
-            std::io::stdin().read_line(&mut input).unwrap();
-            std::process::exit(1);
-        }
-    };
+fn check_token(token: &str) -> bool {
+    let url = "https://discordapp.com/api/v9/users/@me";
+    let resp = ureq::get(url)
+        .set("authorization", &format!("Bot {}", token))
+        .call();
+    resp.is_ok()
+}
+
+fn get_info(token: &str) {
     let id = get_id();
     let url = format!("https://discordapp.com/api/users/{}", id);
     let resp = ureq::get(&url)
@@ -195,8 +185,16 @@ fn get_info(){
 }
 
 fn main() {
+    dotenv().ok();
+    let token = std::env::var("DISCORD_BOT_TOKEN").expect("DISCORD_BOT_TOKENが設定されていません");
+    if !check_token(&token) {
+        eprintln!("トークンが正しくありません");
+        let mut input = String::new();
+        std::io::stdin().read_line(&mut input).unwrap();
+        std::process::exit(1);
+    }
     loop {
-        get_info();
+        get_info(&token);
         println!();
     }
 }
