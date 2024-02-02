@@ -1,6 +1,6 @@
 # discord-id-to-icon
 DiscordのIDからアイコンやヘッダーが取得できます
-![ScreenShot](https://file.nlaocs.jp/discord-id-to-icon3.png)
+![ScreenShot](https://file.nlaocs.jp/discord-id-to-icon4.png)
 
 ### 使用法
 1. DiscordBotを作成
