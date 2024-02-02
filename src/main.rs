@@ -51,30 +51,38 @@ fn get_token(id: &str ) -> String {
 }
 
 fn get_link(id: &str, image_id: &str, image_type: &str) -> String {
-    let gif_url = format!("https://cdn.discordapp.com/{}/{}/{}.gif?size=4096", image_type, id, image_id);
-    let png_url = format!("https://cdn.discordapp.com/{}/{}/{}.png?size=4096", image_type, id, image_id);
-
-    let gif_resp = ureq::get(&gif_url).call();
-    if gif_resp.is_ok() {
-        gif_url
+    if image_id == "null" {
+        "null".to_string()
     } else {
-        let png_resp = ureq::get(&png_url).call();
-        if png_resp.is_ok() {
-            png_url
+        let gif_url = format!("https://cdn.discordapp.com/{}/{}/{}.gif?size=4096", image_type, id, image_id);
+        let png_url = format!("https://cdn.discordapp.com/{}/{}/{}.png?size=4096", image_type, id, image_id);
+
+        let gif_resp = ureq::get(&gif_url).call();
+        if gif_resp.is_ok() {
+            gif_url
         } else {
-            "null".to_string()
+            let png_resp = ureq::get(&png_url).call();
+            if png_resp.is_ok() {
+                png_url
+            } else {
+                "null".to_string()
+            }
         }
     }
 }
 
 fn get_decoration_link(decoration_data: &Value) -> String {
-    let info: Decoration = serde_json::from_value(decoration_data.clone()).expect("エラーーー");
-    let url = format!("https://cdn.discordapp.com/avatar-decoration-presets/{}.png?size=4096", info.asset);
-    let url_resp = ureq::get(&url).call();
-    if url_resp.is_ok() {
-        return url;
+    if decoration_data.is_null() {
+        "null".to_string()
     } else {
-        return "null".to_string();
+        let info: Decoration = serde_json::from_value(decoration_data.clone()).expect("エラーーーー");
+        let url = format!("https://cdn.discordapp.com/avatar-decoration-presets/{}.png?size=4096", info.asset);
+        let url_resp = ureq::get(&url).call();
+        if url_resp.is_ok() {
+            url
+        } else {
+            "null".to_string()
+        }
     }
 }
 
@@ -157,7 +165,8 @@ fn get_info(token: &str) {
         let bot = info.bot.unwrap_or(false);
         let banner_link = get_link(&info.id, &info.banner.unwrap_or_else(|| "".to_string()), "banners");
         let accent_color = info.accent_color.map_or("null".to_string(), |color| color.to_string());
-        let avatar_decoration_link = get_decoration_link(&info.avatar_decoration_data.unwrap_or_else(|| serde_json::json!(null)));
+        let avatar_decoration_data = info.avatar_decoration_data.unwrap_or_else(|| serde_json::json!(null));
+        let avatar_decoration_link = get_decoration_link(&avatar_decoration_data);
         let banner_color = info.banner_color.unwrap_or("null".to_string());
         let token = format!("{}.****.*********", get_token(&info.id));
         let created_account_utc = convert_timestamp(&info.id);
@@ -166,7 +175,7 @@ fn get_info(token: &str) {
         println!("Username: {}", username);
         println!("Global Name: {}", global_name);
         println!("Old Name: {}", old_name);
-        println!("AvatarLink: {}", avatar_link);
+        println!("Avatar Link: {}", avatar_link);
         println!("Discriminator: {}", discriminator);
         println!("Public Flags: {}", public_flags);
         println!("Nitro Type: {}", premium_type);
