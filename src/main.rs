@@ -24,6 +24,11 @@ struct UserInfo {
     banner_color: Option<String>,
 }
 
+#[derive(Deserialize)]
+struct Decoration {
+    asset: String,
+}
+
 fn convert_timestamp(id_str: &str) -> NaiveDateTime {
     let id: i64 = id_str.parse().unwrap();
     let epoch: i64 = 1420070400000;
@@ -45,20 +50,31 @@ fn get_token(id: &str ) -> String {
     general_purpose::STANDARD.encode(id).replace("=", "")
 }
 
-fn get_link(id: &str, image_id: &str, image_type: &str) -> Result<String, bool> {
+fn get_link(id: &str, image_id: &str, image_type: &str) -> String {
     let gif_url = format!("https://cdn.discordapp.com/{}/{}/{}.gif?size=4096", image_type, id, image_id);
     let png_url = format!("https://cdn.discordapp.com/{}/{}/{}.png?size=4096", image_type, id, image_id);
 
     let gif_resp = ureq::get(&gif_url).call();
     if gif_resp.is_ok() {
-        return Ok(gif_url);
+        gif_url
     } else {
         let png_resp = ureq::get(&png_url).call();
         if png_resp.is_ok() {
-            return Ok(png_url);
+            png_url
         } else {
-            return Err(false);
+            "null".to_string()
         }
+    }
+}
+
+fn get_decoration_link(decoration_data: &Value) -> String {
+    let info: Decoration = serde_json::from_value(decoration_data.clone()).expect("エラーーー");
+    let url = format!("https://cdn.discordapp.com/avatar-decoration-presets/{}.png?size=4096", info.asset);
+    let url_resp = ureq::get(&url).call();
+    if url_resp.is_ok() {
+        return url;
+    } else {
+        return "null".to_string();
     }
 }
 
@@ -132,22 +148,16 @@ fn get_info(token: &str) {
         let username = &info.username;
         let global_name = info.global_name.unwrap_or("null".to_string());
         let old_name = old_name(&info.username, &info.discriminator);
-        let avatar_link = match get_link(&info.id, &info.avatar.unwrap_or_else(|| "".to_string()), "avatars") {
-            Ok(url) => url,
-            Err(_) => "null".to_string(),
-        };
+        let avatar_link = get_link(&info.id, &info.avatar.unwrap_or_else(|| "".to_string()), "avatars");
         let discriminator = info.discriminator;
         let public_flags = info.public_flags;
         let premium_type = nitro_type(info.premium_type);
         let flags = info.flags;
         let badges = check_flags(&flags);
         let bot = info.bot.unwrap_or(false);
-        let banner_link = match get_link(&info.id, &info.banner.unwrap_or_else(|| "".to_string()), "banners") {
-            Ok(url) => url,
-            Err(_) => "null".to_string(),
-        };
+        let banner_link = get_link(&info.id, &info.banner.unwrap_or_else(|| "".to_string()), "banners");
         let accent_color = info.accent_color.map_or("null".to_string(), |color| color.to_string());
-        let avatar_decoration_data = info.avatar_decoration_data.unwrap_or_else(|| serde_json::json!(null));
+        let avatar_decoration_link = get_decoration_link(&info.avatar_decoration_data.unwrap_or_else(|| serde_json::json!(null)));
         let banner_color = info.banner_color.unwrap_or("null".to_string());
         let token = format!("{}.****.*********", get_token(&info.id));
         let created_account_utc = convert_timestamp(&info.id);
@@ -167,7 +177,7 @@ fn get_info(token: &str) {
         println!("Bot: {}", bot);
         println!("Banner Link: {}", banner_link);
         println!("Accent Color: {}", accent_color);
-        println!("Avatar Decoration Data: {}", avatar_decoration_data);
+        println!("Avatar Decoration Link: {}", avatar_decoration_link);
         println!("Banner Color: {}", banner_color);
         println!("Token: {}", token);
         println!("Created Account(UTC): {}", created_account_utc);
