@@ -67,6 +67,7 @@ fn nitro_type(nitrotype: u32) -> String {
         0 => "false".to_string(),
         1 => "Nitro Classic".to_string(),
         2 => "Nitro".to_string(),
+        3 => "Nitro Basic".to_string(),
         _ => "null".to_string(),
     }
 }
