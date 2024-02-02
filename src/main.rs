@@ -119,7 +119,7 @@ fn check_token(token: &str) -> bool {
 
 fn get_info(token: &str) {
     let id = get_id();
-    let url = format!("https://discordapp.com/api/users/{}", id);
+    let url = format!("https://discord.com/api/v10/users/{}", id);
     let resp = ureq::get(&url)
         .set("authorization", &format!("Bot {}", token))
         .set("content-type", "application/json")
