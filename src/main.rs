@@ -1,6 +1,5 @@
 use std::io;
 use std::io::Write;
-use ureq;
 use dotenv::dotenv;
 use serde::Deserialize;
 use serde_json::Value;
@@ -33,8 +32,7 @@ fn convert_timestamp(id_str: &str) -> NaiveDateTime {
     let id: i64 = id_str.parse().unwrap();
     let epoch: i64 = 1420070400000;
     let timestamp = ((id >> 22) + epoch) / 1000;
-    let datetime = Utc.timestamp_opt(timestamp, 0).unwrap().naive_utc();
-    datetime
+    Utc.timestamp_opt(timestamp, 0).unwrap().naive_utc()
 }
 
 fn get_id() -> String {
@@ -47,7 +45,7 @@ fn get_id() -> String {
 }
 
 fn get_token(id: &str ) -> String {
-    general_purpose::STANDARD.encode(id).replace("=", "")
+    general_purpose::STANDARD.encode(id).replace('=', "")
 }
 
 fn get_link(id: &str, image_id: &str, image_type: &str) -> String {
@@ -156,14 +154,14 @@ fn get_info(token: &str) {
         let username = &info.username;
         let global_name = info.global_name.unwrap_or("null".to_string());
         let old_name = old_name(&info.username, &info.discriminator);
-        let avatar_link = get_link(&info.id, &info.avatar.unwrap_or_else(|| "".to_string()), "avatars");
+        let avatar_link = get_link(&info.id, &info.avatar.unwrap_or_default(), "avatars");
         let discriminator = info.discriminator;
         let public_flags = info.public_flags;
         let premium_type = nitro_type(info.premium_type);
         let flags = info.flags;
         let badges = check_flags(&flags);
         let bot = info.bot.unwrap_or(false);
-        let banner_link = get_link(&info.id, &info.banner.unwrap_or_else(|| "".to_string()), "banners");
+        let banner_link = get_link(&info.id, &info.banner.unwrap_or_default(), "banners");
         let accent_color = info.accent_color.map_or("null".to_string(), |color| color.to_string());
         let avatar_decoration_data = info.avatar_decoration_data.unwrap_or_else(|| serde_json::json!(null));
         let avatar_decoration_link = get_decoration_link(&avatar_decoration_data);
