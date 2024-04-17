@@ -13,7 +13,6 @@ struct UserInfo {
     avatar: Option<String>,
     discriminator: String,
     public_flags: u32,
-    premium_type: u32,
     flags: u32,
     bot: Option<bool>,
     banner: Option<String>,
@@ -21,6 +20,7 @@ struct UserInfo {
     global_name: Option<String>,
     avatar_decoration_data: Option<Value>,
     banner_color: Option<String>,
+    clan: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -81,16 +81,6 @@ fn get_decoration_link(decoration_data: &Value) -> String {
         } else {
             "null".to_string()
         }
-    }
-}
-
-fn nitro_type(nitrotype: u32) -> String {
-    match nitrotype {
-        0 => "false".to_string(),
-        1 => "Nitro Classic".to_string(),
-        2 => "Nitro".to_string(),
-        3 => "Nitro Basic".to_string(),
-        _ => "null".to_string(),
     }
 }
 
@@ -157,7 +147,6 @@ fn get_info(token: &str) {
         let avatar_link = get_link(&info.id, &info.avatar.unwrap_or_default(), "avatars");
         let discriminator = info.discriminator;
         let public_flags = info.public_flags;
-        let premium_type = nitro_type(info.premium_type);
         let flags = info.flags;
         let badges = check_flags(&flags);
         let bot = info.bot.unwrap_or(false);
@@ -166,6 +155,7 @@ fn get_info(token: &str) {
         let avatar_decoration_data = info.avatar_decoration_data.unwrap_or_else(|| serde_json::json!(null));
         let avatar_decoration_link = get_decoration_link(&avatar_decoration_data);
         let banner_color = info.banner_color.unwrap_or("null".to_string());
+        let clan = info.clan;
         let token = format!("{}.****.*********", get_token(&info.id));
         let created_account_utc = convert_timestamp(&info.id);
         let created_account_jst = created_account_utc + chrono::Duration::hours(9);
@@ -176,7 +166,6 @@ fn get_info(token: &str) {
         println!("Avatar Link: {}", avatar_link);
         println!("Discriminator: {}", discriminator);
         println!("Public Flags: {}", public_flags);
-        println!("Nitro Type: {}", premium_type);
         println!("Badge Flags: {}", flags);
         for badges in badges.iter() {
             println!("Badge: {}", badges);
@@ -186,6 +175,7 @@ fn get_info(token: &str) {
         println!("Accent Color: {}", accent_color);
         println!("Avatar Decoration Link: {}", avatar_decoration_link);
         println!("Banner Color: {}", banner_color);
+        println!("Clan: {}", clan.unwrap_or("null".to_string()));
         println!("Token: {}", token);
         println!("Created Account(UTC): {}", created_account_utc);
         println!("Created Account(JST): {}", created_account_jst);
